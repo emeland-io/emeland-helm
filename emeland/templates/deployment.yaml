@@ -1,0 +1,329 @@
+{{- if .Values.filter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emeland.fullname" . }}-filter
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: filter
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "emeland.selectorLabels" . | nindent 6 }}
+      component: filter
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "emeland.labels" . | nindent 8 }}
+        component: filter
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emeland.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: filter
+          image: {{ include "emeland.filterImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.filter.pullPolicy }}
+          env:
+            - name: SERVICE_ADDR
+              value: ":8080"
+            - name: DATA_DIR
+              value: "/data"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        {{- if and .Values.filter.registerWebserver .Values.server.enabled }}
+        {{ include "emeland.registerSubscriberContainer" (list . "register-webserver" (include "emeland.filterLocalApiUrl" .) (tpl (index .Values.filter.downstreamSubscribers 0) .)) | nindent 8 }}
+        {{- end }}
+        {{- if (index .Values "modelsrv-k8s-sensor").enabled }}
+        {{ include "emeland.registerSubscriberContainer" (list . "register-k8s-sensor" (include "emeland.k8sSensorPublisherApiUrl" .) (include "emeland.filterApiUrl" .)) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+
+{{- end }}
+{{- if .Values.server.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emeland.fullname" . }}-server
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: server
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "emeland.selectorLabels" . | nindent 6 }}
+      component: server
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "emeland.labels" . | nindent 8 }}
+        component: server
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emeland.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: server
+          image: {{ include "emeland.serverImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          {{- if .Values.server.noAuth }}
+          env:
+            - name: NO_AUTH
+              value: "true"
+            {{- with .Values.server.publicResourceTypes }}
+            - name: PUBLIC_RESOURCE_TYPES
+              value: {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+
+{{- end }}
+{{- if .Values.tools.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emeland.fullname" . }}-tools
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: tools
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "emeland.selectorLabels" . | nindent 6 }}
+      component: tools
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "emeland.labels" . | nindent 8 }}
+        component: tools
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emeland.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: tools
+          image: {{ include "emeland.toolsImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.tools.pullPolicy }}
+          command: ["sh"]
+          stdin: true
+          tty: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+
+{{- end }}
+{{- if .Values.gitsensor.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emeland.fullname" . }}-gitsensor
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: gitsensor
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "emeland.selectorLabels" . | nindent 6 }}
+      component: gitsensor
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "emeland.labels" . | nindent 8 }}
+        component: gitsensor
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emeland.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: gitsensor
+          image: {{ include "emeland.gitsensorImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.gitsensor.pullPolicy }}
+          args:
+            - -config
+            - /config/sensor.yaml
+            - -listen
+            - "0.0.0.0:{{ .Values.gitsensor.listenPort }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.gitsensor.listenPort }}
+              protocol: TCP
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: gitsensor-config
+              mountPath: /config
+              readOnly: true
+            - name: deploy-key
+              mountPath: /keys
+              readOnly: true
+            - name: work
+              mountPath: /work
+        {{- if and .Values.filter.enabled .Values.gitsensor.registerFilter }}
+        {{ include "emeland.registerSubscriberContainer" (list . "register-filter" (printf "http://127.0.0.1:%v/api/" .Values.gitsensor.listenPort) (include "emeland.filterApiUrl" .)) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: gitsensor-config
+          configMap:
+            name: {{ include "emeland.fullname" . }}-gitsensor-config
+        - name: deploy-key
+          secret:
+            secretName: {{ include "emeland.gitsensorDeployKeySecretName" . }}
+            defaultMode: 0444
+        - name: work
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Helm dependencies (fetched by `helm dependency update` in CI and locally)
+**/charts/*.tgz
+**/Chart.lock
+**/tmpcharts-*
+
+# Packaged charts (output of `helm package`)
+*.tgz
+
+# Local values overrides (keep example files if added later)
+my-values.yaml
+values.local.yaml
+**/values.local.yaml

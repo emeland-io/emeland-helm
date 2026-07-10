@@ -1,0 +1,159 @@
+# Subchart toggles (gated by condition: in Chart.yaml — skips the subchart entirely when false).
+modelsrv-k8s-sensor:
+  enabled: true
+  fullnameOverride: emeland-k8s-sensor
+  image:
+    tag: "v0.3.0"
+    repository: ghcr.io/emeland-io/modelsrv-k8s-sensor
+  manager:
+    # Static subscriber baked into the sensor process (restored on every pod start).
+    subscriberUrls:
+      - "http://emeland-filter:80/api/"
+    allowInboundPush: true
+
+# Default values for emeland.
+replicaCount: 1
+
+# Event subscription reconciliation (sidecars re-register after pod restarts).
+subscriptions:
+  reconcileIntervalSeconds: 5
+  registerImage: curlimages/curl:8.5.0
+
+# Resource names are prefixed emeland-* (filter, server, tools, gitsensor, k8s-sensor).
+fullnameOverride: emeland
+
+image:
+  server:
+    registry: ghcr.io/emeland-io
+    repository: modelsrv-web-ui-server
+    tag: "0.4.0"
+    pullPolicy: IfNotPresent
+  tools:
+    registry: ghcr.io/emeland-io
+    repository: emelandctl
+    tag: "v0.9.1-rc1"
+    pullPolicy: IfNotPresent
+  gitsensor:
+    registry: ghcr.io/emeland-io
+    repository: modelsrv-git-sensor
+    tag: "v0.9.1-rc1"
+    pullPolicy: IfNotPresent
+  filter:
+    registry: ghcr.io/emeland-io
+    repository: modelsrv
+    tag: "v0.9.3-rc3"
+    pullPolicy: IfNotPresent
+
+tools:
+  enabled: true
+
+# modelsrv-web-ui-server embeds modelsrv in-process (no separate backend sidecar).
+server:
+  enabled: true
+  noAuth: false
+  publicResourceTypes: ""
+
+# Phase0 integrity filter (modelsrv) between sensors and web UI server.
+# Flow: gitsensor -> filter -> webserver
+#       k8s-sensor -> filter -> webserver
+# Subscriptions are reconciled continuously by sidecars after pod restarts.
+filter:
+  enabled: true
+  service:
+    port: 80
+  k8sSensor:
+    apiPort: 8080
+  # Register the webserver as a downstream subscriber on the filter.
+  registerWebserver: true
+  downstreamSubscribers:
+    - http://{{ include "emeland.fullname" . }}-server:{{ .Values.service.port }}/api/
+
+# Git sensor watches external Git repositories and pushes resource events to the filter or server.
+gitsensor:
+  enabled: false
+  subscribers: []
+  listenPort: 24100
+  # Runtime reconciliation sidecar (in addition to static subscribers in sensor.yaml).
+  registerFilter: true
+  # SSH deploy key: prefer existingSecret over inline deployKey values.
+  existingSecret: ""
+  deployKey:
+    privateKey: ""
+    publicKey: ""
+  repos: []
+  # Example:
+  # repos:
+  #   - type: github
+  #     repo: git@github.com:org/landscape.git
+  #     branch: main
+  #     checkoutDir: /work/checkout/landscape
+  #     paths:
+  #       - manifests/
+
+imagePullSecrets: []
+nameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: emeland.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  hostnames:
+    - emeland.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,33 @@
+{{- if .Values.gitsensor.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "emeland.fullname" . }}-gitsensor-config
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+data:
+  sensor.yaml: |
+    subscribers:
+{{- if .Values.gitsensor.subscribers }}
+{{- range .Values.gitsensor.subscribers }}
+      - {{ tpl . $ | quote }}
+{{- end }}
+{{- else if .Values.filter.enabled }}
+      - {{ include "emeland.filterApiUrl" . | quote }}
+{{- else }}
+      - {{ include "emeland.modelsrvApiUrl" . | quote }}
+{{- end }}
+    watch: true
+    repos:
+{{- range .Values.gitsensor.repos }}
+      - type: {{ .type | default "github" | quote }}
+        deployKey: {{ .deployKey | default "/keys/id_ed25519.pub" | quote }}
+        repo: {{ .repo | quote }}
+        branch: {{ .branch | quote }}
+        checkoutDir: {{ .checkoutDir | quote }}
+        paths:
+{{- range .paths }}
+          - {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

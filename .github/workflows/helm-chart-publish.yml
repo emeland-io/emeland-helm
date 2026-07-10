@@ -1,0 +1,63 @@
+name: Publish Helm charts
+
+on:
+  push:
+    tags: ['v*']
+
+env:
+  REGISTRY: ghcr.io
+  # Repository-scoped OCI path: packages published with GITHUB_TOKEN inherit this repo's visibility.
+  # See https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions
+  HELM_OCI_REPO: ghcr.io/${{ github.repository }}
+
+jobs:
+  publish-charts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: v3.17.3
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package and push charts
+        run: |
+          set -euo pipefail
+          for chart in emeland emeland-crd; do
+            sed -i "s/^version:.*/version: ${VERSION}/" "${chart}/Chart.yaml"
+            helm dependency update "${chart}"
+            helm package "${chart}"
+            echo "Pushing ${chart} to oci://${HELM_OCI_REPO}"
+            helm push "${chart}-${VERSION}.tgz" "oci://${HELM_OCI_REPO}"
+          done
+
+      - name: Verify published charts
+        run: |
+          set -euo pipefail
+          for chart in emeland emeland-crd; do
+            ref="oci://${HELM_OCI_REPO}/${chart}"
+            echo "Verifying ${ref} --version ${VERSION}"
+            helm show chart "${ref}" --version "${VERSION}" >/dev/null
+            echo "  OK: ${ref} --version ${VERSION}"
+          done
+          echo ""
+          echo "Install (public repo = anonymous pull):"
+          echo "  helm upgrade --install emeland-crd oci://${HELM_OCI_REPO}/emeland-crd --version ${VERSION} -n emeland --create-namespace"
+          echo "  helm upgrade --install emeland oci://${HELM_OCI_REPO}/emeland --version ${VERSION} -n emeland --create-namespace"
