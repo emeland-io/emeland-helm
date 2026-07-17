@@ -13,10 +13,10 @@ Charts are published as OCI artifacts to [GitHub Container Registry](https://git
 
 ## Quick start
 
-Install CRDs first, then the main stack. Replace `0.1.0` with the [release version](https://github.com/emeland-io/emeland-helm/releases) you want.
+Install CRDs first, then the main stack. Replace `0.2.0` with the [release version](https://github.com/emeland-io/emeland-helm/releases) you want.
 
 ```bash
-export CHART_VERSION=0.1.0
+export CHART_VERSION=0.2.0
 export HELM_OCI_REPO=oci://ghcr.io/emeland-io/emeland-helm
 
 helm upgrade --install emeland-crd "${HELM_OCI_REPO}/emeland-crd" \
