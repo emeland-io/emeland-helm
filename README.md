@@ -27,7 +27,9 @@ helm upgrade --install emeland-crd "${HELM_OCI_REPO}/emeland-crd" \
 helm upgrade --install emeland "${HELM_OCI_REPO}/emeland" \
   --version "${CHART_VERSION}" \
   --namespace emeland \
-  --create-namespace
+  --create-namespace \
+  --set server.noAuth=true \
+  --set 'server.publicResourceTypes=System\,SystemInstance\,Node\,NodeType\,Context\,ContextType\,Finding\,FindingType\,API\,APIInstance\,Component\,ComponentInstance\,FilterRule\,MergeRule'
 ```
 
 List published chart versions:
