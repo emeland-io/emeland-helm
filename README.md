@@ -13,7 +13,7 @@ Charts are published as OCI artifacts to [GitHub Container Registry](https://git
 
 ## Quick start
 
-Install CRDs first, then the main stack. Replace `0.3.0` with the [release version](https://github.com/emeland-io/emeland-helm/releases) you want.
+Install CRDs first, then the main stack. Use **`CHART_VERSION=0.3.0`** or newer — older parent chart versions bundle k8s-sensor **0.3.0** / **0.4.0**.
 
 ```bash
 export CHART_VERSION=0.3.0
@@ -28,7 +28,15 @@ helm upgrade --install emeland "${HELM_OCI_REPO}/emeland" \
   --version "${CHART_VERSION}" \
   --namespace emeland \
   --create-namespace \
-  --set server.noAuth=true 
+  --set server.noAuth=true
+```
+
+Verify the k8s-sensor image after install:
+
+```bash
+kubectl get deploy emeland-k8s-sensor -n emeland \
+  -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+# Expected: ghcr.io/emeland-io/modelsrv-k8s-sensor:0.6.0
 ```
 
 List published chart versions:
@@ -109,6 +117,7 @@ Key values:
 
 | Value | Description |
 |-------|-------------|
+| `modelsrv-k8s-sensor.image.tag` | Image tag (default: subchart appVersion, e.g. `0.6.0`) |
 | `server.noAuth` | Disable OIDC auth (default: `false`) |
 | `gitsensor.enabled` | Enable git sensor (default: `false`) |
 | `gitsensor.repos` | External Git repositories to watch |
