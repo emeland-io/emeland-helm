@@ -51,7 +51,8 @@ tools:
 server:
   enabled: true
   noAuth: false
-  publicResourceTypes: ""
+  # Comma-separated resource types visible without OIDC ownership (used when noAuth is true).
+  publicResourceTypes: "System,SystemInstance,Node,NodeType,Context,ContextType,Finding,FindingType,API,APIInstance,Component,ComponentInstance,FilterRule,MergeRule"
 
 # Phase0 integrity filter (modelsrv) between sensors and web UI server.
 # Flow: gitsensor -> filter -> webserver
