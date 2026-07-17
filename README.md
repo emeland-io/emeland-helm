@@ -119,6 +119,22 @@ Key values:
 
 See [`emeland/values.yaml`](emeland/values.yaml) for defaults.
 
+## Examples
+
+### FindingRules
+
+The [`examples/findingrules/`](examples/findingrules/) directory contains sample FindingRule CRs for the Kubernetes sensor. Apply them after installing the stack and CRDs:
+
+```bash
+kubectl apply -f examples/findingrules/
+```
+
+| Example | Purpose |
+|---------|---------|
+| [`namespace-validation.yaml`](examples/findingrules/namespace-validation.yaml) | Flags namespaces missing the `app=backend` label |
+
+FindingRules are cluster-scoped CRs (`structure.emeland.io/v1alpha1`). The k8s-sensor evaluates them against watched resources and emits findings into the landscape model via the filter.
+
 ### Git sensor
 
 When enabling the git sensor, configure external repositories and provide a deploy key:
