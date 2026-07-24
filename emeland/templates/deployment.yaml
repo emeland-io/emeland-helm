@@ -40,6 +40,10 @@ spec:
         - name: filter
           image: {{ include "emeland.filterImage" . | quote }}
           imagePullPolicy: {{ .Values.image.filter.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: SERVICE_ADDR
               value: ":8080"
@@ -133,6 +137,10 @@ spec:
         - name: server
           image: {{ include "emeland.serverImage" . | quote }}
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if .Values.server.noAuth }}
           env:
             - name: NO_AUTH
@@ -218,6 +226,10 @@ spec:
         - name: tools
           image: {{ include "emeland.toolsImage" . | quote }}
           imagePullPolicy: {{ .Values.image.tools.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           command: ["sh"]
           stdin: true
           tty: true
@@ -279,6 +291,10 @@ spec:
         - name: gitsensor
           image: {{ include "emeland.gitsensorImage" . | quote }}
           imagePullPolicy: {{ .Values.image.gitsensor.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - -config
             - /config/sensor.yaml
