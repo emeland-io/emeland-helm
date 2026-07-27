@@ -141,14 +141,9 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.server.noAuth }}
+          {{- with .Values.server.env }}
           env:
-            - name: NO_AUTH
-              value: "true"
-            {{- with .Values.server.publicResourceTypes }}
-            - name: PUBLIC_RESOURCE_TYPES
-              value: {{ . | quote }}
-            {{- end }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           ports:
             - name: http
