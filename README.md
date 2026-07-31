@@ -6,14 +6,16 @@ Charts are published as OCI artifacts to [GitHub Container Registry](https://git
 
 ## Charts
 
-| Chart | Purpose |
-|-------|---------|
-| `emeland-crd` | CRDs required by the Kubernetes sensor |
-| `emeland` | Web UI server, filter, CLI tools, git sensor, and k8s sensor |
+
+| Chart         | Purpose                                                      |
+| ------------- | ------------------------------------------------------------ |
+| `emeland-crd` | CRDs required by the Kubernetes sensor                       |
+| `emeland`     | Web UI server, filter, CLI tools, git sensor, and k8s sensor |
+
 
 ## Quick start
 
-Install CRDs first, then the main stack. Use **`CHART_VERSION=0.3.0`** or newer — older parent chart versions bundle k8s-sensor **0.3.0** / **0.4.0**.
+Install CRDs first, then the main stack. Use `CHART_VERSION=0.3.0` or newer — older parent chart versions bundle k8s-sensor **0.3.0** / **0.4.0**.
 
 ```bash
 export CHART_VERSION=0.3.0
@@ -36,7 +38,7 @@ Verify the k8s-sensor image after install:
 ```bash
 kubectl get deploy emeland-k8s-sensor -n emeland \
   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
-# Expected: ghcr.io/emeland-io/modelsrv-k8s-sensor:0.6.0
+# Expected: ghcr.io/emeland-io/modelsrv-k8s-sensor:0.6.1
 ```
 
 List published chart versions:
@@ -44,6 +46,8 @@ List published chart versions:
 ```bash
 helm show chart oci://ghcr.io/emeland-io/emeland-helm/emeland --versions
 ```
+
+
 
 ## Architecture
 
@@ -75,6 +79,8 @@ helm show chart oci://ghcr.io/emeland-io/emeland-helm/emeland --versions
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+
+
 ## Components
 
 The `emeland` chart deploys:
@@ -90,15 +96,17 @@ All workload names are prefixed `emeland-*` via `fullnameOverride`.
 
 ## Container images
 
-The chart pulls the following images from `ghcr.io/emeland-io` (tags are set in [`emeland/values.yaml`](emeland/values.yaml)):
+The chart pulls the following images from `ghcr.io/emeland-io` (tags are set in `[emeland/values.yaml](emeland/values.yaml)`):
 
-| Image | Component |
-|-------|-----------|
-| `ghcr.io/emeland-io/modelsrv-web-ui-server` | Web UI server |
-| `ghcr.io/emeland-io/modelsrv` | Filter |
-| `ghcr.io/emeland-io/emelandctl` | CLI tools |
-| `ghcr.io/emeland-io/modelsrv-git-sensor` | Git sensor (optional) |
-| `ghcr.io/emeland-io/modelsrv-k8s-sensor` | Kubernetes sensor |
+
+| Image                                       | Component             |
+| ------------------------------------------- | --------------------- |
+| `ghcr.io/emeland-io/modelsrv-web-ui-server` | Web UI server         |
+| `ghcr.io/emeland-io/modelsrv`               | Filter                |
+| `ghcr.io/emeland-io/emelandctl`             | CLI tools             |
+| `ghcr.io/emeland-io/modelsrv-git-sensor`    | Git sensor (optional) |
+| `ghcr.io/emeland-io/modelsrv-k8s-sensor`    | Kubernetes sensor     |
+
 
 The `emeland-crd` chart installs CRDs only and does not deploy a container image.
 
@@ -115,31 +123,37 @@ helm upgrade --install emeland oci://ghcr.io/emeland-io/emeland-helm/emeland \
 
 Key values:
 
-| Value | Description |
-|-------|-------------|
-| `modelsrv-k8s-sensor.image.tag` | Image tag (default: subchart appVersion, e.g. `0.6.0`) |
-| `server.noAuth` | Disable OIDC auth (default: `false`) |
-| `gitsensor.enabled` | Enable git sensor (default: `false`) |
-| `gitsensor.repos` | External Git repositories to watch |
-| `gitsensor.existingSecret` | Pre-created Secret with SSH deploy key |
-| `modelsrv-k8s-sensor.enabled` | Enable Kubernetes sensor |
-| `ingress.enabled` / `httpRoute.enabled` | Expose the web UI server |
 
-See [`emeland/values.yaml`](emeland/values.yaml) for defaults.
+| Value                                   | Description                                            |
+| --------------------------------------- | ------------------------------------------------------ |
+| `modelsrv-k8s-sensor.image.tag`         | Image tag (default: subchart appVersion, e.g. `0.6.0`) |
+| `server.noAuth`                         | Disable OIDC auth (default: `false`)                   |
+| `gitsensor.enabled`                     | Enable git sensor (default: `false`)                   |
+| `gitsensor.repos`                       | External Git repositories to watch                     |
+| `gitsensor.existingSecret`              | Pre-created Secret with SSH deploy key                 |
+| `modelsrv-k8s-sensor.enabled`           | Enable Kubernetes sensor                               |
+| `ingress.enabled` / `httpRoute.enabled` | Expose the web UI server                               |
+
+
+See `[emeland/values.yaml](emeland/values.yaml)` for defaults.
 
 ## Examples
 
+
+
 ### FindingRules
 
-The [`examples/findingrules/`](examples/findingrules/) directory contains sample FindingRule CRs for the Kubernetes sensor. Apply them after installing the stack and CRDs:
+The `[examples/findingrules/](examples/findingrules/)` directory contains sample FindingRule CRs for the Kubernetes sensor. Apply them after installing the stack and CRDs:
 
 ```bash
 kubectl apply -f examples/findingrules/
 ```
 
-| Example | Purpose |
-|---------|---------|
-| [`namespace-validation.yaml`](examples/findingrules/namespace-validation.yaml) | Flags namespaces missing the `app=backend` label |
+
+| Example                                                                        | Purpose                                          |
+| ------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `[namespace-validation.yaml](examples/findingrules/namespace-validation.yaml)` | Flags namespaces missing the `app=backend` label |
+
 
 FindingRules are cluster-scoped CRs (`structure.emeland.io/v1alpha1`). The k8s-sensor evaluates them against watched resources and emits findings into the landscape model via the filter.
 
@@ -169,6 +183,8 @@ kubectl create secret generic emeland-gitsensor-deploy-key \
   -n emeland
 ```
 
+
+
 ## Publishing
 
 Charts are published to GHCR automatically when a `v*` tag is pushed:
@@ -178,6 +194,8 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+
+
 ## Differences from the demo stack
 
 This chart is derived from [emeland-demo-stack-chart](https://github.com/emeland-io/emeland-demo-stack-chart) with demo-only components removed:
@@ -186,3 +204,4 @@ This chart is derived from [emeland-demo-stack-chart](https://github.com/emeland
 - No Prometheus/Grafana stack
 - Auth enabled by default
 - Git sensor connects to external repositories only
+
