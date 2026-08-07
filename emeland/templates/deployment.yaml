@@ -70,6 +70,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.filter.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         {{- if and .Values.filter.registerWebserver .Values.server.enabled }}
         {{ include "emeland.registerSubscriberContainer" (list . "register-webserver" (include "emeland.filterLocalApiUrl" .) (tpl (index .Values.filter.downstreamSubscribers 0) .)) | nindent 8 }}
         {{- end }}
@@ -79,6 +85,12 @@ spec:
       volumes:
         - name: data
           emptyDir: {}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.filter.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -90,8 +102,15 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}      {{- with or .Values.volumes .Values.server.volumes }}
+      volumes:
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
-
 ---
 
 {{- end }}
@@ -163,6 +182,15 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with or .Values.volumeMounts .Values.server.volumeMounts }}
+          volumeMounts:
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -174,6 +202,15 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with or .Values.volumes .Values.server.volumes }}
+      volumes:
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 
 ---
@@ -228,6 +265,15 @@ spec:
           command: ["sh"]
           stdin: true
           tty: true
+          {{- with or .Values.volumeMounts .Values.tools.volumeMounts }}
+          volumeMounts:
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.tools.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -239,6 +285,15 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with or .Values.volumes .Values.tools.volumes }}
+      volumes:
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.tools.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 
 ---
@@ -312,6 +367,12 @@ spec:
               readOnly: true
             - name: work
               mountPath: /work
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.gitsensor.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
         {{- if and .Values.filter.enabled .Values.gitsensor.registerFilter }}
         {{ include "emeland.registerSubscriberContainer" (list . "register-filter" (printf "http://127.0.0.1:%v/api/" .Values.gitsensor.listenPort) (include "emeland.filterApiUrl" .)) | nindent 8 }}
         {{- end }}
@@ -325,6 +386,12 @@ spec:
             defaultMode: 0444
         - name: work
           emptyDir: {}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.gitsensor.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
