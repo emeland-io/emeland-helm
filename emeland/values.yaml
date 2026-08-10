@@ -156,8 +156,46 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
 
+# Additional volumes to mount in all deployments (at pod spec level).
+# Each deployment will mount these volumes in its containers.
+# Example:
+# volumes:
+#   - name: custom-config
+#     configMap:
+#       name: my-config
+#   - name: custom-secret
+#     secret:
+#       secretName: my-secret
 volumes: []
+
+# Additional volume mounts for all containers in all deployments.
+# Example:
+# volumeMounts:
+#   - name: custom-config
+#     mountPath: /etc/config
+#     readOnly: true
+#   - name: custom-secret
+#     mountPath: /etc/secrets
+#     readOnly: true
 volumeMounts: []
+
+# Per-component volume and mount configuration.
+# These are merged with the global volumes/volumeMounts above.
+filter:
+  volumes: []
+  volumeMounts: []
+
+server:
+  volumes: []
+  volumeMounts: []
+
+tools:
+  volumes: []
+  volumeMounts: []
+
+gitsensor:
+  volumes: []
+  volumeMounts: []
 
 nodeSelector: {}
 tolerations: []
