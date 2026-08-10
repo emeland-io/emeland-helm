@@ -127,6 +127,9 @@ Key values:
 | Value                                   | Description                                            |
 | --------------------------------------- | ------------------------------------------------------ |
 | `modelsrv-k8s-sensor.image.tag`         | Image tag (default: subchart appVersion, e.g. `0.6.0`) |
+| `image.filter.tag`                      | Filter modelsrv image (default: `v0.10.2`)             |
+| `filter.subscribers`                    | Static downstream URLs for filter → webserver          |
+| `modelsrv-k8s-sensor.manager.subscriberUrls` | Static downstream URLs for k8s-sensor → filter    |
 | `server.noAuth`                         | Disable OIDC auth (default: `false`)                   |
 | `gitsensor.enabled`                     | Enable git sensor (default: `false`)                   |
 | `gitsensor.repos`                       | External Git repositories to watch                     |

@@ -4,7 +4,7 @@ description: Production Helm chart for deploying the EmELand stack on Kubernetes
 
 type: application
 
-version: 0.3.0
+version: 0.3.1
 
 appVersion: "0.9.0"
 

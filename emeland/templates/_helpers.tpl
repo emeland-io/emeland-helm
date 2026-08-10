@@ -90,6 +90,18 @@ In-cluster phase0 filter API base URL (must end with /api/).
 {{- end }}
 
 {{/*
+Comma-separated filter downstream subscriber URLs for modelsrv SUBSCRIBERS / --subscribers.
+Each entry is tpl-evaluated so chart helpers can be used in values.
+*/}}
+{{- define "emeland.filterSubscribersCSV" -}}
+{{- $urls := list -}}
+{{- range .Values.filter.subscribers -}}
+{{- $urls = append $urls (tpl . $) -}}
+{{- end -}}
+{{- join "," $urls -}}
+{{- end }}
+
+{{/*
 modelsrv-k8s-sensor subchart fullname (mirrors modelsrv-k8s-sensor.fullname).
 */}}
 {{- define "emeland.k8sSensorFullname" -}}
@@ -104,22 +116,6 @@ modelsrv-k8s-sensor subchart fullname (mirrors modelsrv-k8s-sensor.fullname).
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
-{{- end }}
-
-{{/*
-In-cluster k8s-sensor modelsrv REST API base URL (no trailing slash).
-Uses the supplemental -api Service when the bundled subchart does not expose port 8080.
-*/}}
-{{- define "emeland.k8sSensorApiServiceUrl" -}}
-{{- $port := .Values.filter.k8sSensor.apiPort | default 8080 -}}
-{{- printf "http://%s-api:%v" (include "emeland.k8sSensorFullname" .) $port -}}
-{{- end }}
-
-{{/*
-In-cluster k8s-sensor modelsrv event publisher API (must end with /api/).
-*/}}
-{{- define "emeland.k8sSensorPublisherApiUrl" -}}
-{{- printf "%s/api/" (include "emeland.k8sSensorApiServiceUrl" .) -}}
 {{- end }}
 
 {{/*
@@ -148,13 +144,6 @@ In-cluster git sensor modelsrv REST API base URL (must end with /api/).
 */}}
 {{- define "emeland.gitsensorApiUrl" -}}
 {{- printf "http://%s-gitsensor:%v/api/" (include "emeland.fullname" .) .Values.gitsensor.listenPort -}}
-{{- end }}
-
-{{/*
-Local filter modelsrv REST API base URL for sidecars in the filter pod (must end with /api/).
-*/}}
-{{- define "emeland.filterLocalApiUrl" -}}
-http://127.0.0.1:8080/api/
 {{- end }}
 
 {{- define "emeland.gitsensorDeployKeySecretName" -}}

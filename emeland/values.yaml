@@ -15,11 +15,6 @@ modelsrv-k8s-sensor:
 # Default values for emeland.
 replicaCount: 1
 
-# Event subscription reconciliation (sidecars re-register after pod restarts).
-subscriptions:
-  reconcileIntervalSeconds: 5
-  registerImage: curlimages/curl:8.21.0
-
 # Resource names are prefixed emeland-* (filter, server, tools, gitsensor, k8s-sensor).
 fullnameOverride: emeland
 
@@ -27,7 +22,7 @@ image:
   server:
     registry: ghcr.io/emeland-io
     repository: modelsrv-web-ui-server
-    tag: "0.5.1"
+    tag: "0.5.2"
     pullPolicy: IfNotPresent
   tools:
     registry: ghcr.io/emeland-io
@@ -42,15 +37,19 @@ image:
   filter:
     registry: ghcr.io/emeland-io
     repository: modelsrv
-    tag: "v0.10.1"
+    tag: "v0.10.2"
     pullPolicy: IfNotPresent
 
 tools:
   enabled: true
+  volumes: []
+  volumeMounts: []
 
 # modelsrv-web-ui-server embeds modelsrv in-process (no separate backend sidecar).
 server:
   enabled: true
+  volumes: []
+  volumeMounts: []
   env:
     - name: NO_AUTH
       value: "false"
@@ -61,31 +60,33 @@ server:
 # Phase0 integrity filter (modelsrv) between sensors and web UI server.
 # Flow: gitsensor -> filter -> webserver
 #       k8s-sensor -> filter -> webserver
-# Subscriptions are reconciled continuously by sidecars after pod restarts.
+# Static --subscribers / SUBSCRIBERS on modelsrv >= v0.10.2 (no register sidecars).
 filter:
   enabled: true
   service:
     port: 80
   k8sSensor:
     apiPort: 8080
-  # Register the webserver as a downstream subscriber on the filter.
-  registerWebserver: true
-  downstreamSubscribers:
+  # Downstream modelsrv base API URLs (modelsrv server --subscribers / SUBSCRIBERS).
+  subscribers:
     - http://{{ include "emeland.fullname" . }}-server:{{ .Values.service.port }}/api/
+  volumes: []
+  volumeMounts: []
 
 # Git sensor watches external Git repositories and pushes resource events to the filter or server.
+# Subscribers are baked into sensor.yaml (defaults to filter when enabled, else the webserver).
 gitsensor:
   enabled: false
   subscribers: []
   listenPort: 24100
-  # Runtime reconciliation sidecar (in addition to static subscribers in sensor.yaml).
-  registerFilter: true
   # SSH deploy key: prefer existingSecret over inline deployKey values.
   existingSecret: ""
   deployKey:
     privateKey: ""
     publicKey: ""
   repos: []
+  volumes: []
+  volumeMounts: []
   # Example:
   # repos:
   #   - type: github
@@ -178,24 +179,6 @@ volumes: []
 #     mountPath: /etc/secrets
 #     readOnly: true
 volumeMounts: []
-
-# Per-component volume and mount configuration.
-# These are merged with the global volumes/volumeMounts above.
-filter:
-  volumes: []
-  volumeMounts: []
-
-server:
-  volumes: []
-  volumeMounts: []
-
-tools:
-  volumes: []
-  volumeMounts: []
-
-gitsensor:
-  volumes: []
-  volumeMounts: []
 
 nodeSelector: {}
 tolerations: []
