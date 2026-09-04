@@ -1,0 +1,9 @@
+tools:
+  volumeMounts:
+    - name: tools-config
+      mountPath: /etc/tools
+      readOnly: true
+  volumes:
+    - name: tools-config
+      configMap:
+        name: emeland-tools-config

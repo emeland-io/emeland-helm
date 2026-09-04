@@ -1,0 +1,9 @@
+filter:
+  volumeMounts:
+    - name: filter-config
+      mountPath: /etc/filter
+      readOnly: true
+  volumes:
+    - name: filter-config
+      configMap:
+        name: emeland-filter-config

@@ -1,11 +1,12 @@
-name: Lint Helm charts
+name: Quality Helm charts
 
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
-  lint:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
@@ -21,3 +22,6 @@ jobs:
           helm dependency update emeland-crd
           helm lint emeland
           helm lint emeland-crd
+
+      - name: Render chart default and scenario values
+        run: make helm-test

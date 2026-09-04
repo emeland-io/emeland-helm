@@ -74,19 +74,19 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            {{- with .Values.volumeMounts }}
+            {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.filter.volumeMounts }}
+            {{- with $.Values.filter.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
         - name: data
           emptyDir: {}
-        {{- with .Values.volumes }}
+        {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.filter.volumes }}
+        {{- with $.Values.filter.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
@@ -172,12 +172,12 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with or .Values.volumeMounts .Values.server.volumeMounts }}
+          {{- with or $.Values.volumeMounts $.Values.server.volumeMounts }}
           volumeMounts:
-            {{- with .Values.volumeMounts }}
+            {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.server.volumeMounts }}
+            {{- with $.Values.server.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
@@ -193,12 +193,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with or .Values.volumes .Values.server.volumes }}
+      {{- with or $.Values.volumes $.Values.server.volumes }}
       volumes:
-        {{- with .Values.volumes }}
+        {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.server.volumes }}
+        {{- with $.Values.server.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
@@ -255,12 +255,12 @@ spec:
           command: ["sh"]
           stdin: true
           tty: true
-          {{- with or .Values.volumeMounts .Values.tools.volumeMounts }}
+          {{- with or $.Values.volumeMounts $.Values.tools.volumeMounts }}
           volumeMounts:
-            {{- with .Values.volumeMounts }}
+            {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.tools.volumeMounts }}
+            {{- with $.Values.tools.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
@@ -276,12 +276,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with or .Values.volumes .Values.tools.volumes }}
+      {{- with or $.Values.volumes $.Values.tools.volumes }}
       volumes:
-        {{- with .Values.volumes }}
+        {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.tools.volumes }}
+        {{- with $.Values.tools.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
@@ -357,10 +357,10 @@ spec:
               readOnly: true
             - name: work
               mountPath: /work
-            {{- with .Values.volumeMounts }}
+            {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.gitsensor.volumeMounts }}
+            {{- with $.Values.gitsensor.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
@@ -373,10 +373,10 @@ spec:
             defaultMode: 0444
         - name: work
           emptyDir: {}
-        {{- with .Values.volumes }}
+        {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.gitsensor.volumes }}
+        {{- with $.Values.gitsensor.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
