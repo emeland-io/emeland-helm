@@ -1,0 +1,18 @@
+gitsensor:
+  enabled: true
+  existingSecret: emeland-gitsensor-deploy-key
+  repos:
+    - type: github
+      repo: git@github.com:example/landscape.git
+      branch: main
+      checkoutDir: /work/checkout/landscape
+      paths:
+        - manifests/
+  volumeMounts:
+    - name: gitsensor-config-local
+      mountPath: /etc/gitsensor
+      readOnly: true
+  volumes:
+    - name: gitsensor-config-local
+      configMap:
+        name: emeland-gitsensor-config

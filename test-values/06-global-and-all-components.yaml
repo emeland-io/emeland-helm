@@ -1,0 +1,57 @@
+volumeMounts:
+  - name: global-config
+    mountPath: /etc/global
+    readOnly: true
+volumes:
+  - name: global-config
+    configMap:
+      name: emeland-global-config
+
+filter:
+  volumeMounts:
+    - name: filter-config
+      mountPath: /etc/filter
+      readOnly: true
+  volumes:
+    - name: filter-config
+      configMap:
+        name: emeland-filter-config
+
+server:
+  volumeMounts:
+    - name: server-config
+      mountPath: /etc/server
+      readOnly: true
+  volumes:
+    - name: server-config
+      configMap:
+        name: emeland-server-config
+
+tools:
+  volumeMounts:
+    - name: tools-config
+      mountPath: /etc/tools
+      readOnly: true
+  volumes:
+    - name: tools-config
+      configMap:
+        name: emeland-tools-config
+
+gitsensor:
+  enabled: true
+  existingSecret: emeland-gitsensor-deploy-key
+  repos:
+    - type: github
+      repo: git@github.com:example/landscape.git
+      branch: main
+      checkoutDir: /work/checkout/landscape
+      paths:
+        - manifests/
+  volumeMounts:
+    - name: gitsensor-config-local
+      mountPath: /etc/gitsensor
+      readOnly: true
+  volumes:
+    - name: gitsensor-config-local
+      configMap:
+        name: emeland-gitsensor-config

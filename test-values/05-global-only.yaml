@@ -1,0 +1,8 @@
+volumeMounts:
+  - name: global-config
+    mountPath: /etc/global
+    readOnly: true
+volumes:
+  - name: global-config
+    configMap:
+      name: emeland-global-config
