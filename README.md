@@ -38,7 +38,7 @@ Verify the k8s-sensor image after install:
 ```bash
 kubectl get deploy emeland-k8s-sensor -n emeland \
   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
-# Expected: ghcr.io/emeland-io/modelsrv-k8s-sensor:0.6.1
+# Expected: ghcr.io/emeland-io/modelsrv-k8s-sensor:v0.6.4
 ```
 
 List published chart versions:
@@ -126,8 +126,8 @@ Key values:
 
 | Value                                   | Description                                            |
 | --------------------------------------- | ------------------------------------------------------ |
-| `modelsrv-k8s-sensor.image.tag`         | Image tag (default: subchart appVersion, e.g. `0.6.0`) |
-| `image.filter.tag`                      | Filter modelsrv image (default: `v0.10.2`)             |
+| `modelsrv-k8s-sensor.image.tag`         | Image tag (default: `v0.6.4`) |
+| `image.filter.tag`                      | Filter modelsrv image (default: `v0.10.5`)             |
 | `filter.subscribers`                    | Static downstream URLs for filter → webserver          |
 | `modelsrv-k8s-sensor.manager.subscriberUrls` | Static downstream URLs for k8s-sensor → filter    |
 | `server.noAuth`                         | Disable OIDC auth (default: `false`)                   |

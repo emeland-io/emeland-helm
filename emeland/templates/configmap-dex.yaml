@@ -1,0 +1,31 @@
+{{- if and .Values.server.enabled .Values.dex.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "emeland.fullname" . }}-dex
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: dex
+data:
+  config.yaml: |
+    issuer: {{ .Values.dex.issuer }}
+    storage:
+      type: memory
+    web:
+      http: 0.0.0.0:5556
+    telemetry:
+      http: 0.0.0.0:5558
+    oauth2:
+      skipApprovalScreen: true
+    staticClients:
+      - id: {{ .Values.dex.clientID | quote }}
+        name: EmELand UI
+        redirectURIs:
+          {{- range .Values.dex.redirectURIs }}
+          - {{ . | quote }}
+          {{- end }}
+        public: true
+    enablePasswordDB: true
+    staticPasswords:
+      {{- toYaml .Values.dex.staticPasswords | nindent 6 }}
+{{- end }}

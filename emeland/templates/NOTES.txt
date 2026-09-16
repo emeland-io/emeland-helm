@@ -32,6 +32,15 @@
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- if .Values.dex.enabled }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "emeland.fullname" . }}-dex 5556:5556
+
+  Dex login (public PKCE client {{ .Values.dex.clientID }}):
+    issuer:       {{ .Values.dex.issuer }}
+    redirectURIs: {{ join ", " .Values.dex.redirectURIs }}
+    user:         admin@emeland.io
+    password:     password
+{{- end }}
 {{- end }}
 
 2. Attach to the CLI tools pod:

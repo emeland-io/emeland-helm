@@ -1,0 +1,18 @@
+# Local Dex sidecar for debugging OIDC login (modelsrv-web-ui-server#21).
+#
+#   helm upgrade --install emeland ./emeland -n emeland --create-namespace -f examples/dex/values.yaml
+#   kubectl -n emeland port-forward svc/emeland-server 8080:80
+#   kubectl -n emeland port-forward svc/emeland-dex 5556:5556
+#
+# Open http://localhost:8080 and log in as admin@emeland.io / password.
+#
+# Dex is a public PKCE client (no secret). Issuer and redirectURI must stay
+# on localhost so the browser and the in-pod token proxy share one URL.
+
+dex:
+  enabled: true
+
+server:
+  env:
+    - name: PUBLIC_RESOURCE_TYPES
+      value: "System,SystemInstance,Node,NodeType,Context,ContextType,Finding,FindingType,API,APIInstance,Component,ComponentInstance,FilterRule,MergeRule"

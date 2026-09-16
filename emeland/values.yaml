@@ -3,8 +3,8 @@ modelsrv-k8s-sensor:
   enabled: true
   fullnameOverride: emeland-k8s-sensor
   image:
-    # Leave tag empty to use the subchart appVersion (matches Chart.yaml dependency, e.g. 0.6.0).
-    tag: "v0.6.1"
+    # Leave tag empty to use the subchart appVersion (matches Chart.yaml dependency, e.g. 0.6.4).
+    tag: "v0.6.4"
     repository: ghcr.io/emeland-io/modelsrv-k8s-sensor
   manager:
     # Static subscriber baked into the sensor process (restored on every pod start).
@@ -22,12 +22,12 @@ image:
   server:
     registry: ghcr.io/emeland-io
     repository: modelsrv-web-ui-server
-    tag: "0.5.2"
+    tag: "0.5.5"
     pullPolicy: IfNotPresent
   tools:
     registry: ghcr.io/emeland-io
     repository: emelandctl
-    tag: "v0.9.1-rc1"
+    tag: "v0.10.5"
     pullPolicy: IfNotPresent
   gitsensor:
     registry: ghcr.io/emeland-io
@@ -37,7 +37,7 @@ image:
   filter:
     registry: ghcr.io/emeland-io
     repository: modelsrv
-    tag: "v0.10.2"
+    tag: "v0.10.5"
     pullPolicy: IfNotPresent
 
 tools:
@@ -56,6 +56,31 @@ server:
     # Comma-separated resource types visible without OIDC ownership (used when noAuth is true).
     - name: PUBLIC_RESOURCE_TYPES
       value: "System,SystemInstance,Node,NodeType,Context,ContextType,Finding,FindingType,API,APIInstance,Component,ComponentInstance,FilterRule,MergeRule"
+
+# In-cluster Dex sidecar for local OIDC debugging (same pattern as
+# modelsrv-web-ui-server/deploy/demo.yaml). Keep disabled in production;
+# point OIDC_ISSUER_URL at an external IdP instead.
+# Enable with: helm upgrade ... -f examples/dex/values.yaml
+dex:
+  enabled: false
+  image:
+    repository: ghcr.io/dexidp/dex
+    tag: v2.41.1
+    pullPolicy: IfNotPresent
+  # Must be reachable from the browser (port-forward) and from the server
+  # container (localhost via the sidecar).
+  issuer: http://localhost:5556/dex
+  clientID: emeland-ui
+  logLevel: debug
+  redirectURIs:
+    - http://localhost:8080/callback
+    - http://127.0.0.1:8080/callback
+  # email: admin@emeland.io / password: password
+  staticPasswords:
+    - email: admin@emeland.io
+      hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+      username: admin
+      userID: "00000000-0000-0000-0000-000000000001"
 
 # Phase0 integrity filter (modelsrv) between sensors and web UI server.
 # Flow: gitsensor -> filter -> webserver

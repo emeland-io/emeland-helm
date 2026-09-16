@@ -38,4 +38,24 @@ spec:
   selector:
     {{- include "emeland.selectorLabels" . | nindent 4 }}
     component: server
+{{- if .Values.dex.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "emeland.fullname" . }}-dex
+  labels:
+    {{- include "emeland.labels" . | nindent 4 }}
+    component: dex
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5556
+      targetPort: dex
+      protocol: TCP
+      name: dex
+  selector:
+    {{- include "emeland.selectorLabels" . | nindent 4 }}
+    component: server
+{{- end }}
 {{- end }}
