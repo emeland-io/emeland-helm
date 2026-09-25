@@ -8,6 +8,10 @@
 #
 # Dex is a public PKCE client (no secret). Issuer and redirectURI must stay
 # on localhost so the browser and the in-pod token proxy share one URL.
+#
+# Dex covers browser login only. In-cluster filter → server replication
+# (POST /api/events/push) does not use a Dex/JWT token; use a
+# modelsrv-web-ui-server image that exempts that path from JWT.
 
 dex:
   enabled: true

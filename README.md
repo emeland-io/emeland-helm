@@ -130,7 +130,8 @@ Key values:
 | `image.filter.tag`                      | Filter modelsrv image (default: `v0.10.5`)             |
 | `filter.subscribers`                    | Static downstream URLs for filter → webserver          |
 | `modelsrv-k8s-sensor.manager.subscriberUrls` | Static downstream URLs for k8s-sensor → filter    |
-| `server.noAuth`                         | Disable OIDC auth (default: `false`)                   |
+| `server.env` / `NO_AUTH`                | Disable OIDC auth (`true`/`false`; `false` keeps auth on) |
+| `dex.enabled`                           | Sidecar Dex for local browser OIDC (default: `false`)  |
 | `gitsensor.enabled`                     | Enable git sensor (default: `false`)                   |
 | `gitsensor.repos`                       | External Git repositories to watch                     |
 | `gitsensor.existingSecret`              | Pre-created Secret with SSH deploy key                 |
@@ -142,7 +143,15 @@ See `[emeland/values.yaml](emeland/values.yaml)` for defaults.
 
 ## Examples
 
+### Local Dex (browser login)
 
+Use `[examples/dex/values.yaml](examples/dex/values.yaml)` to run a Dex sidecar next to the web UI server for local OIDC debugging:
+
+```bash
+helm upgrade --install emeland ./emeland -n emeland --create-namespace -f examples/dex/values.yaml
+```
+
+Dex is for **browser login only**. In-cluster filter → server replication (`POST /api/events/push`) does not send a Dex/JWT token; the web UI server image must leave that path unauthenticated. After releasing a `modelsrv-web-ui-server` build with that exemption, bump `image.server.tag` in `emeland/values.yaml`.
 
 ### FindingRules
 

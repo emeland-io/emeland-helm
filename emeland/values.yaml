@@ -22,7 +22,7 @@ image:
   server:
     registry: ghcr.io/emeland-io
     repository: modelsrv-web-ui-server
-    tag: "0.5.5"
+    tag: "0.5.6"
     pullPolicy: IfNotPresent
   tools:
     registry: ghcr.io/emeland-io
@@ -51,9 +51,10 @@ server:
   volumes: []
   volumeMounts: []
   env:
+    # Parsed as a real boolean by modelsrv-web-ui-server (false/0 keep auth on).
     - name: NO_AUTH
-      value: "false"
-    # Comma-separated resource types visible without OIDC ownership (used when noAuth is true).
+      value: "true"
+    # Comma-separated resource types visible without OIDC ownership.
     - name: PUBLIC_RESOURCE_TYPES
       value: "System,SystemInstance,Node,NodeType,Context,ContextType,Finding,FindingType,API,APIInstance,Component,ComponentInstance,FilterRule,MergeRule"
 

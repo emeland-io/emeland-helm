@@ -183,7 +183,7 @@ spec:
           {{- if or .Values.dex.enabled .Values.server.env }}
           env:
             {{- if .Values.dex.enabled }}
-            {{/* modelsrv-web-ui-server treats any non-empty NO_AUTH as enabled, including "false". */}}
+            {{/* Skip NO_AUTH from server.env when Dex is on so an overlay cannot set NO_AUTH=true and silently disable OIDC. */}}
             - name: OIDC_ISSUER_URL
               value: {{ .Values.dex.issuer | quote }}
             - name: OIDC_CLIENT_ID
