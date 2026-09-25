@@ -22,7 +22,7 @@ image:
   server:
     registry: ghcr.io/emeland-io
     repository: modelsrv-web-ui-server
-    tag: "0.5.6"
+    tag: "0.5.7"
     pullPolicy: IfNotPresent
   tools:
     registry: ghcr.io/emeland-io
