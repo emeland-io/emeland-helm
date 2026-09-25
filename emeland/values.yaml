@@ -3,8 +3,8 @@ modelsrv-k8s-sensor:
   enabled: true
   fullnameOverride: emeland-k8s-sensor
   image:
-    # Leave tag empty to use the subchart appVersion (matches Chart.yaml dependency, e.g. 0.6.4).
-    tag: "v0.6.4"
+    # Leave tag empty to use the subchart appVersion (matches Chart.yaml dependency, e.g. 0.6.5).
+    tag: "v0.6.5"
     repository: ghcr.io/emeland-io/modelsrv-k8s-sensor
   manager:
     # Static subscriber baked into the sensor process (restored on every pod start).
@@ -22,7 +22,7 @@ image:
   server:
     registry: ghcr.io/emeland-io
     repository: modelsrv-web-ui-server
-    tag: "0.5.7"
+    tag: "0.5.8"
     pullPolicy: IfNotPresent
   tools:
     registry: ghcr.io/emeland-io
@@ -37,7 +37,7 @@ image:
   filter:
     registry: ghcr.io/emeland-io
     repository: modelsrv
-    tag: "v0.10.5"
+    tag: "v0.12.1"
     pullPolicy: IfNotPresent
 
 tools:
